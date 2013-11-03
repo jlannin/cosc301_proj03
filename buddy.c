@@ -1,3 +1,12 @@
+/*
+Justin Lannin and Adam Becker
+11/2/13
+Cosc301
+Professor Sommers
+Project 3
+
+Both present throughout entire creation of project.
+*/
 #include <stdio.h>
 #include <unistd.h>
 #include <stdlib.h>
@@ -51,7 +60,7 @@ void *mymalloc(size_t request_size) {
 	{
 		return NULL;
 	}
-	while (*(temp+1) != 0) //next is not 0
+	while (*(temp+1) != 0) //check up to last spot in freelist
 	{
 		if(request_size <= (*(temp+0))) //small enough
 		{
@@ -62,7 +71,7 @@ void *mymalloc(size_t request_size) {
 			temp = temp + ((*(temp+1))/4); //next spot in freelist
 		}
 	}
-	if (request_size <= (*(temp+0)))
+	if (request_size <= (*(temp+0))) //check if last spot is big enough
 	{
 		return findandalloc(request_size, temp);
 	}
@@ -72,9 +81,11 @@ void *mymalloc(size_t request_size) {
 	}
 }
 
+//finds a block that is large enough for request_size
+//allocates (and updates) that block and returns it.
 static void *findandalloc(int request_size, int *temp)
 {
-	while(request_size <= ((*(temp+0))/2))
+	while(request_size <= ((*(temp+0))/2))  //while the half block is still big enough for size requested
 	{
 		int halfsize = (*(temp+0))/2;
 		*(temp + (halfsize/4)) = halfsize; //size of right free block
@@ -89,13 +100,13 @@ static void *findandalloc(int request_size, int *temp)
 		*(temp+0) = halfsize;
 		*(temp+1) = halfsize;
 	}
-	if(freelist == temp)//freelist is pointing where we are allocating
+	if(freelist == temp)//freelist is pointing where we are allocating (first item in freelist)
 	{
-		if( *(freelist+1) == 0)
+		if( *(freelist+1) == 0) //only item in freelist?
 		{
 			freelist = NULL;
 		}
-		else
+		else // update freelist to point to next block
 		{
 			freelist += *(freelist+1)/4;
 		}
@@ -107,7 +118,7 @@ static void *findandalloc(int request_size, int *temp)
 		{
 			tempfree += (*(tempfree + 1)/4);
 		}
-		//at spot before temp
+		//currently at spot before block to be malloced
 		if (*(temp+1) == 0) //if block allocating is in last spot
 		{
 			*(tempfree+1) = 0;
@@ -121,6 +132,7 @@ static void *findandalloc(int request_size, int *temp)
 	return (void*)(temp+2); //return after header
 }
 
+//returns the correct size of block required
 static size_t manageInput(size_t size)
 {
 	size_t newsize = size + 8;
@@ -173,7 +185,7 @@ void myfree(void *memory_block)
 		}
 		
 	}
-	while(1)
+	while(1)  //merging of blocks
 	{
 		int *before = getbefore(memtemp);
 		if(checkbuddy(before, memtemp)) //previous is buddy?
@@ -198,6 +210,7 @@ void myfree(void *memory_block)
 	}
 }
 
+//takes pointers to two blocks and merges them together
 static int* merge(int *left, int* right)
 {
 	*(right+0) = 0;
@@ -214,9 +227,11 @@ static int* merge(int *left, int* right)
 	return left;
 }
 
+//returns the block in freelist before 
+//memtemp, or memtemp if that is the first
+//block in freelist
 static int *getbefore(int * memtemp)
 {
-	//freelist == memtemp
 	if(freelist == memtemp)
 	{
 		return memtemp;
@@ -229,6 +244,7 @@ static int *getbefore(int * memtemp)
 	return freetemp;
 }
 
+//takes two blocks and returns 1 if they are buddies and 0 otherwise
 static int checkbuddy(int* one, int* two)
 {
 	if(*(one) != *(two)) //if the sizes are not the same, no reason to keep going
@@ -265,33 +281,33 @@ void dump_memory_map(void) {
 	int* temp = heap_begin;
 	if(freelist == NULL)
 	{
-		printf("%s%d%s%d%s\n", "Block size(1): ", HEAPSIZE, ", offset ", count, ", allocated");
+		printf("%s%d%s%d%s\n", "Block size: ", HEAPSIZE, ", offset ", count, ", allocated");
 		return;
 	}
 	else if(*(temp+1) == 0 && freelist != heap_begin) //1st block allocated
 	{
 		int firstsize = (freelist - (int*) heap_begin)*4;
-		printf("%s%d%s%d%s\n", "Block size(3): ", firstsize, ", offset ", count, ", allocated");
+		printf("%s%d%s%d%s\n", "Block size: ", firstsize, ", offset ", count, ", allocated");
 		count = firstsize;
 	}
 	temp = freelist;
 	while(*(temp+1) != 0) //next is not 0
 	{
-		printf("%s%d%s%d%s\n", "Block size(4): ", *(temp + 0), ", offset ", count, ", free");
+		printf("%s%d%s%d%s\n", "Block size: ", *(temp + 0), ", offset ", count, ", free");
 		count = count + *(temp+1);
 		if(*(temp+1) > *(temp+0)) //if next > size
 		{
 			int sizealloc = ((*(temp+1)) - (*(temp + 0))); // next - size
-			printf("%s%d%s%d%s\n", "Block size(5): ", sizealloc, ", offset ", count-sizealloc, ", allocated");
+			printf("%s%d%s%d%s\n", "Block size: ", sizealloc, ", offset ", count-sizealloc, ", allocated");
 		}	
 		temp = temp + (*(temp + 1))/4;
 	}
-	printf("%s%d%s%d%s\n", "Block size(6): ", *(temp + 0), ", offset ", count, ", free"); //print out last element of free
+	printf("%s%d%s%d%s\n", "Block size: ", *(temp + 0), ", offset ", count, ", free"); //print out last element of free
 	count = count + *(temp+0);
 	//test if one more allocated
 	if(count != HEAPSIZE)
 	{
-		printf("%s%d%s%d%s\n", "Block size(7): ", HEAPSIZE - count, ", offset ", count, ", allocated");
+		printf("%s%d%s%d%s\n", "Block size: ", HEAPSIZE - count, ", offset ", count, ", allocated");
 	}
 
 }
