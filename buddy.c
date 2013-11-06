@@ -7,6 +7,7 @@ Project 3
 
 Both present throughout entire creation of project.
 */
+
 #include <stdio.h>
 #include <unistd.h>
 #include <stdlib.h>
@@ -279,7 +280,7 @@ static int checkbuddy(int* one, int* two)
 void dump_memory_map(void) {
 	int count = 0;
 	int* temp = heap_begin;
-	if(freelist == NULL)
+	if(freelist == NULL) //all allocated
 	{
 		printf("%s%d%s%d%s\n", "Block size: ", HEAPSIZE, ", offset ", count, ", allocated");
 		return;
@@ -291,7 +292,7 @@ void dump_memory_map(void) {
 		count = firstsize;
 	}
 	temp = freelist;
-	while(*(temp+1) != 0) //next is not 0
+	while(*(temp+1) != 0) //next is not 0 (not end of freelist)
 	{
 		printf("%s%d%s%d%s\n", "Block size: ", *(temp + 0), ", offset ", count, ", free");
 		count = count + *(temp+1);

@@ -11,15 +11,24 @@ void dump_memory_map(void);
 int main(int argc, char **argv) {
  
 myfree(NULL);
-    //void *m1 = mymalloc(250000);  // should allocate 64 bytes
-    void *m2 = mymalloc(100); // should allocate 128 bytes
-   // void *m3 = mymalloc(250000);
- void *m4 = mymalloc(2000);
-   // myfree(m1);
-    //myfree(m2);
-     myfree(m2);
- myfree(m4);
-	//void *m6 = mymalloc (2000);
+    void *m1 = mymalloc(250000);  // should allocate 64 bytes
+    dump_memory_map(); 
+	printf("\n");
+	void *m2 = mymalloc(250000); // should allocate 128 bytes
+    dump_memory_map(); 
+	printf("\n");
+    void *m3 = mymalloc(250000);
+	    dump_memory_map(); 
+	printf("\n"); 
+ //myfree(m1);
+    myfree(m1);
+    dump_memory_map(); 
+	printf("\n");
+     //myfree(m3);
+   // dump_memory_map(); 
+	//printf("\n");
+ myfree(m2);
+	////void *m6 = mymalloc (2000);
 //	void *m5 = mymalloc(300);
     /*void *m3 = mymalloc(56);  // should allocate 64 bytes
     //void *m7 = mymalloc(500000);  // should allocate 64 bytes
